@@ -138,7 +138,7 @@ class ReflectionClient(BaseClient):
 
     def __init__(self, endpoint, symbol_db=None, descriptor_pool=None, lazy=False, ssl=False, compression=None,
                  **kwargs):
-        super().__init__(endpoint, symbol_db, descriptor_pool, ssl=ssl, compression=compression)
+        super().__init__(endpoint, symbol_db, descriptor_pool, ssl=ssl, compression=compression, **kwargs)
         self._service_names: list = None
         self._lazy = lazy
         self.reflection_stub = reflection_pb2_grpc.ServerReflectionStub(self.channel)
@@ -242,12 +242,15 @@ class ReflectionClient(BaseClient):
         return metadata
 
     def register_service(self, service_name):
-        logging.debug(f"start {service_name} register")
-        file_descriptor = self._get_file_descriptor_by_symbol(service_name)
-        self._register_file_descriptor(file_descriptor)
-        svc_desc = self._desc_pool.FindServiceByName(service_name)
-        self._service_methods_meta[service_name] = self._register_methods(svc_desc)
-        logging.debug(f"end {service_name} register")
+        try:
+            logging.debug(f"start {service_name} register")
+            file_descriptor = self._get_file_descriptor_by_symbol(service_name)
+            self._register_file_descriptor(file_descriptor)
+            svc_desc = self._desc_pool.FindServiceByName(service_name)
+            self._service_methods_meta[service_name] = self._register_methods(svc_desc)
+            logging.debug(f"end {service_name} register")
+        except TypeError as e:
+            logging.debug(f"error registering {service_name}: {e}")
 
     def register_all_service(self):
         for service in self.service_names:
