@@ -213,6 +213,9 @@ results = [x async for x in await greeter.SayHelloOneByOne(requests_data)]
 - [homi](https://github.com/spaceone-dev/homi) : micro grpc framework like flask. easy to use!
 
 ## Change Logs
+- 0.1.1
+    - Change
+        - remove unused package : click #35
 - 0.1.0
     - :sparkles: Feature
         - #29 support fully TLS connect
