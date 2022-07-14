@@ -213,9 +213,11 @@ results = [x async for x in await greeter.SayHelloOneByOne(requests_data)]
 - [homi](https://github.com/spaceone-dev/homi) : micro grpc framework like flask. easy to use!
 
 ## Change Logs
-- 0.1.2
+- 0.1.3
   - :bug:
     - remove click
+  - :warning:
+    - ignore test before deploy...
 - 0.1.1
     - Change
         - remove unused package : click #35
