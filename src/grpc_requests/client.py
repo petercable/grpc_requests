@@ -359,7 +359,10 @@ class ReflectionClient(BaseGrpcClient):
             else:
                 logger.debug(f'{dep_file_name} already registered')
 
-        self._desc_pool.Add(file_descriptor)
+        try:
+            self._desc_pool.Add(file_descriptor)
+        except TypeError:
+            logger.warning(f"{file_descriptor.name} already present in pool. Skipping.")
         logger.debug(f"end {file_descriptor.name} register")
 
     def register_service(self, service_name):
