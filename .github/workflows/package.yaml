@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.8'
     - name: Install dependencies
@@ -26,7 +26,7 @@ jobs:
 #      run: |
 #        pytest --cov-report=xml --cov=src/grpc_requests
 #    - name: Upload coverage to Codecov
-#      uses: codecov/codecov-action@v1
+#      uses: codecov/codecov-action@v3
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
