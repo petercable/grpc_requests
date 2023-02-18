@@ -6,4 +6,4 @@
 flake8 . --count  --statistics
 
 # Tests currently being re-worked - re-enable when finished
-# pytest --cov-report=xml --cov=src/grpc_requests
+pytest --cov-report=xml --cov=src/grpc_requests
