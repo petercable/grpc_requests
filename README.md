@@ -16,7 +16,7 @@ assert client.service_names == ["helloworld.Greeter"]
 
 request_data = {"name": 'sinsky'} 
 result = client.request("helloworld.Greeter", "SayHello", request_data)
-print(result) # {"message":"Hellow sinsky"}
+print(result) # {"message":"Hello sinsky"}
 
 ```
 
