@@ -2,8 +2,6 @@ import logging
 import pytest
 
 from ..grpc_requests.client import Client, ServiceClient
-from .test_protos.helloworld_pb2 import _GREETER
-from google.protobuf.json_format import ParseError
 
 """
 Test cases for ServiceClient

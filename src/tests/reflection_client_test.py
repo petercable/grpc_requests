@@ -2,7 +2,6 @@ import logging
 import pytest
 
 from ..grpc_requests.client import Client
-from .test_servers.helloworld_server import HelloWorldServer
 from google.protobuf.json_format import ParseError
 
 """
@@ -40,7 +39,7 @@ def test_nonexistent_method(helloworld_reflection_client):
 
 def test_unsupported_argument(helloworld_reflection_client):
     with pytest.raises(ParseError):
-        helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {"foo":"bar"})
+        helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {"foo": "bar"})
 
 def test_unary_stream(helloworld_reflection_client):
     name_list = ["sinsky", "viridianforge", "jack", "harry"]

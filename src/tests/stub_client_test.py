@@ -40,7 +40,7 @@ def test_nonexistent_method(helloworld_stub_client):
 
 def test_unsupported_argument(helloworld_stub_client):
     with pytest.raises(ParseError):
-        helloworld_stub_client.unary_unary('helloworld.Greeter', 'SayHello', {"foo":"bar"})
+        helloworld_stub_client.unary_unary('helloworld.Greeter', 'SayHello', {"foo": "bar"})
 
 def test_unary_stream(helloworld_stub_client):
     name_list = ["sinsky", "viridianforge", "jack", "harry"]
