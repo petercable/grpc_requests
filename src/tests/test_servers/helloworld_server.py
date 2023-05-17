@@ -60,9 +60,9 @@ class HelloWorldServer():
         self.server.add_insecure_port(f'[::]:{port}')
 
     def serve(self):
-        logging.warning('Start the server?')
+        logging.debug('Server starting...')
         self.server.start()
-        logging.warning('Server running')
+        logging.debug('Server running...')
         self.server.wait_for_termination()
 
     def shutdown(self):
