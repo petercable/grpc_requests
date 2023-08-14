@@ -24,6 +24,10 @@ def test_unary_unary(helloworld_reflection_client):
     assert type(response) == dict
     assert response == {"message": "Hello, sinsky!"}
 
+def test_get_method_required_fields(helloworld_reflection_client):
+    method_fields = helloworld_reflection_client.get_method_example_message('helloworld.Greeter', 'SayHello')
+    assert method_fields == {'name': 'Sample!'}, f"Expected: {{'name', 'Sample!'}}, Actual: {method_fields}"
+
 def test_empty_body_request(helloworld_reflection_client):
     response = helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {})
     logger.warning(f"Response: {response}")

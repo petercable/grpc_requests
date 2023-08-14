@@ -12,6 +12,7 @@ service Greeter {
 
 // Message Definition
 message HelloRequest {
+  //The name of the individual to say hello to. This is a required field.
   string name = 1;
 }
 

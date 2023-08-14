@@ -11,7 +11,7 @@ from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.json_format import MessageToDict, ParseDict
 from grpc_reflection.v1alpha import reflection_pb2, reflection_pb2_grpc
 
-from .utils import load_data
+from .utils import example_message, load_data
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict  # pylint: disable=no-name-in-module
@@ -290,6 +290,12 @@ class BaseGrpcClient(BaseClient):
     def get_method_descriptor(self, service, method):
         svc_desc = self.get_service_descriptor(service)
         return svc_desc.FindMethodByName(method)
+    
+    def get_method_example_message(self, service: str, method: str) -> dict[str, int]:
+        """
+        return required fields of method
+        """
+        return example_message(self.get_method_descriptor(service, method))
 
     def get_method_meta(self, service: str, method: str) -> MethodMetaData:
         # add lazy mode & exception
