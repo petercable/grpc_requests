@@ -3,5 +3,3 @@ grpcio-reflection>=1.49.1
 google-api-core>=2.9.0
 cryptography>=39.0.1
 protobuf<=4.23.0
-faker>=9.5.1
-```
