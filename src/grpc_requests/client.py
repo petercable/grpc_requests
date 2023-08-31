@@ -286,7 +286,7 @@ class BaseGrpcClient(BaseClient):
 
     def get_service_descriptor(self, service):
         return self._desc_pool.FindServiceByName(service)
-    
+
     def describe_method_request(self, service, method):
         return describe_request(self.get_method_descriptor(service, method))
 

@@ -18,15 +18,34 @@ def helloworld_reflection_client():
     except:  # noqa: E722
         pytest.fail("Could not connect to local HelloWorld server")
 
+@pytest.fixture(scope="module")
+def client_tester_reflection_client():
+    try:
+        client = Client.get_by_endpoint('localhost:50051')
+        yield client
+    except:  # noqa: E722
+        pytest.fail("Could not connect to local Test server")
+
 
 def test_unary_unary(helloworld_reflection_client):
     response = helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {"name": "sinsky"})
     assert type(response) == dict
     assert response == {"message": "Hello, sinsky!"}
 
-def test_describe_method_request(helloworld_reflection_client):
-    request_description = helloworld_reflection_client.describe_method_request('helloworld.Greeter', 'SayHello')
-    assert request_description == {'name': 'STRING'}, f"Expected: {{'name', 'STRING'}}, Actual: {request_description}"
+def test_describe_method_request(client_tester_reflection_client):
+    request_description = \
+        client_tester_reflection_client.describe_method_request('client_tester.ClientTester', 'TestUnaryUnary')
+    expected_request_description = {
+        'factor': 'INT32',
+        'readings': 'FLOAT',
+        'uuid': 'UINT64',
+        'sample_flag': 'BOOL',
+        'request_name': 'STRING',
+        'extra_data': 'BYTES'
+    }
+    assert (
+        request_description == expected_request_description
+    ), f"Expected: {expected_request_description}, Actual: {request_description}"
 
 def test_empty_body_request(helloworld_reflection_client):
     response = helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {})

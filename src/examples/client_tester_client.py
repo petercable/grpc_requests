@@ -36,7 +36,7 @@ print(responses)
 # Stream-Unary Example
 
 stream_unary_method = 'TestStreamUnary'
-stream_unary_request = [{},{},{}]
+stream_unary_request = [{}, {}, {}]
 
 response = client.stream_unary(service, stream_unary_method, stream_unary_request)
 print(response)

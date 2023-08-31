@@ -3,8 +3,8 @@ from grpc_reflection.v1alpha import reflection
 
 import grpc
 import logging
-from client_tester_pb2_grpc import ClientTesterServicer, add_ClientTesterServicer_to_server
-from client_tester_pb2 import TestResponse, DESCRIPTOR
+from .client_tester_pb2_grpc import ClientTesterServicer, add_ClientTesterServicer_to_server
+from .client_tester_pb2 import TestResponse, DESCRIPTOR
 
 class ClientTester(ClientTesterServicer):
 
@@ -56,4 +56,3 @@ class ClientTesterServer():
 if __name__ == "__main__":
     server = ClientTesterServer("50051")
     server.serve()
-
