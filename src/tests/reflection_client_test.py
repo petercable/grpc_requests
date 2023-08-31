@@ -1,7 +1,7 @@
 import logging
 import pytest
 
-from ..grpc_requests.client import Client
+from grpc_requests.client import Client
 from google.protobuf.json_format import ParseError
 
 """
@@ -30,7 +30,6 @@ def test_describe_method_request(helloworld_reflection_client):
 
 def test_empty_body_request(helloworld_reflection_client):
     response = helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {})
-    logger.warning(f"Response: {response}")
     assert type(response) == dict
 
 def test_nonexistent_service(helloworld_reflection_client):

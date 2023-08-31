@@ -2,7 +2,7 @@ import multiprocessing
 import pytest
 import time
 
-from .test_servers.helloworld_server import HelloWorldServer
+from test_servers.helloworld.helloworld_server import HelloWorldServer
 
 
 def helloworld_server_starter():

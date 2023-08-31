@@ -1,8 +1,8 @@
 import logging
 import pytest
 
-from ..grpc_requests.client import StubClient
-from .test_protos.helloworld_pb2 import _GREETER
+from grpc_requests.client import StubClient
+from test_servers.helloworld.helloworld_pb2 import _GREETER
 from google.protobuf.json_format import ParseError
 
 """

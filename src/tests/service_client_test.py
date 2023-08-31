@@ -1,7 +1,7 @@
 import logging
 import pytest
 
-from ..grpc_requests.client import Client, ServiceClient
+from grpc_requests.client import Client, ServiceClient
 
 """
 Test cases for ServiceClient
