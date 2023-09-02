@@ -28,7 +28,7 @@ def load_data(_path):
         data = f.read()
     return data
 
-def describe_request(method_descriptor: MethodDescriptor) -> dict[str, str]:
+def describe_request(method_descriptor: MethodDescriptor) -> dict:
     """
     Provide a dictionary that describes the fields of a Method request
     with a string description of their types.
