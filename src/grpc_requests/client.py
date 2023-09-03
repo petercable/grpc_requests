@@ -11,7 +11,7 @@ from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.json_format import MessageToDict, ParseDict
 from grpc_reflection.v1alpha import reflection_pb2, reflection_pb2_grpc
 
-from .utils import load_data
+from .utils import describe_request, load_data
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict  # pylint: disable=no-name-in-module
@@ -286,6 +286,9 @@ class BaseGrpcClient(BaseClient):
 
     def get_service_descriptor(self, service):
         return self._desc_pool.FindServiceByName(service)
+
+    def describe_method_request(self, service, method):
+        return describe_request(self.get_method_descriptor(service, method))
 
     def get_method_descriptor(self, service, method):
         svc_desc = self.get_service_descriptor(service)

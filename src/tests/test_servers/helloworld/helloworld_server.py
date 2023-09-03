@@ -3,8 +3,8 @@ from grpc_reflection.v1alpha import reflection
 
 import grpc
 import logging
-from ..test_protos.helloworld_pb2_grpc import GreeterServicer, add_GreeterServicer_to_server
-from ..test_protos.helloworld_pb2 import HelloReply, DESCRIPTOR
+from .helloworld_pb2_grpc import GreeterServicer, add_GreeterServicer_to_server
+from .helloworld_pb2 import HelloReply, DESCRIPTOR
 
 class Greeter(GreeterServicer):
 

@@ -1,8 +1,8 @@
 import logging
 import pytest
 
-from ..grpc_requests.client import StubClient
-from .test_protos.helloworld_pb2 import _GREETER
+from grpc_requests.client import StubClient
+from test_servers.helloworld.helloworld_pb2 import _GREETER
 from google.protobuf.json_format import ParseError
 
 """
@@ -22,13 +22,13 @@ def helloworld_stub_client():
 
 def test_unary_unary(helloworld_stub_client):
     response = helloworld_stub_client.unary_unary('helloworld.Greeter', 'SayHello', {"name": "sinsky"})
-    assert type(response) == dict
+    assert isinstance(response, dict)
     assert response == {"message": "Hello, sinsky!"}
 
 def test_empty_body_request(helloworld_stub_client):
     response = helloworld_stub_client.unary_unary('helloworld.Greeter', 'SayHello', {})
     logger.warning(f"Response: {response}")
-    assert type(response) == dict
+    assert isinstance(response, dict)
 
 def test_nonexistent_service(helloworld_stub_client):
     with pytest.raises(ValueError):
@@ -49,7 +49,7 @@ def test_unary_stream(helloworld_stub_client):
         'SayHelloGroup',
         {"name": "".join(name_list)}
     )
-    assert all(type(response) == dict for response in responses)
+    assert all(isinstance(response, dict) for response in responses)
     for response, name in zip(responses, name_list):
         assert response == {"message": f"Hello, {name}!"}
 
@@ -60,7 +60,7 @@ def test_stream_unary(helloworld_stub_client):
         'HelloEveryone',
         [{"name": name} for name in name_list]
     )
-    assert type(response) == dict
+    assert isinstance(response, dict)
     assert response == {'message': f'Hello, {" ".join(name_list)}!'}
 
 def test_stream_stream(helloworld_stub_client):
@@ -70,6 +70,6 @@ def test_stream_stream(helloworld_stub_client):
         'SayHelloOneByOne',
         [{"name": name} for name in name_list]
     )
-    assert all(type(response) == dict for response in responses)
+    assert all(isinstance(response, dict) for response in responses)
     for response, name in zip(responses, name_list):
         assert response == {"message": f"Hello, {name}!"}

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package client_tester;
+
+service ClientTester {
+  rpc TestUnaryUnary (TestRequest) returns (TestResponse) {}
+  rpc TestUnaryStream (TestRequest) returns (stream TestResponse) {}
+  rpc TestStreamUnary (stream TestRequest) returns (TestResponse) {}
+  rpc TestStreamStream (stream TestRequest) returns (stream TestResponse) {}
+}
+
+message TestRequest {
+    int32 factor = 1;
+    repeated float readings = 2;
+    uint64 uuid = 3;
+    bool sample_flag = 4;
+    string request_name = 5;
+    repeated bytes extra_data = 6;
+}
+
+message TestResponse {
+    double average = 1;
+    string feedback = 2;
+}
