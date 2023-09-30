@@ -15,11 +15,14 @@ from .utils import describe_request, load_data
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict  # pylint: disable=no-name-in-module
-    import importlib.metadata as get_metadata
+    import importlib.metadata
+
+    def get_metadata(package_name: str):
+        return importlib.metadata.version(package_name)
 else:
     from typing_extensions import TypedDict
-    
     import pkg_resources
+
     def get_metadata(package_name: str):
         return pkg_resources.get_distribution(package_name).version
 
