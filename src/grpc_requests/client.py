@@ -2,7 +2,6 @@ import logging
 import sys
 from enum import Enum
 from functools import partial
-import importlib.metadata
 from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Tuple, TypeVar, Union
 
 import grpc
@@ -16,11 +15,16 @@ from .utils import describe_request, load_data
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict  # pylint: disable=no-name-in-module
+    import importlib.metadata as get_metadata
 else:
     from typing_extensions import TypedDict
+    
+    import pkg_resources
+    def get_metadata(package_name: str):
+        return pkg_resources.get_distribution(package_name).version
 
 # Import GetMessageClass if protobuf version supports it
-protobuf_minor_version = importlib.metadata.version('protobuf').split('.')[1]
+protobuf_minor_version = get_metadata('protobuf').split('.')[1]
 get_message_class_supported = int(protobuf_minor_version) >= 22
 if get_message_class_supported:
     from google.protobuf.message_factory import GetMessageClass
