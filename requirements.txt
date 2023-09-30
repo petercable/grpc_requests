@@ -2,4 +2,3 @@ grpcio>=1.53.0
 grpcio-reflection>=1.53.0
 google-api-core>=2.9.0
 cryptography>=39.0.1
-protobuf<=4.23.0
