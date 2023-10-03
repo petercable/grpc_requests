@@ -27,8 +27,8 @@ else:
         return pkg_resources.get_distribution(package_name).version
 
 # Import GetMessageClass if protobuf version supports it
-protobuf_minor_version = get_metadata('protobuf').split('.')[1]
-get_message_class_supported = int(protobuf_minor_version) >= 22
+protobuf_version = get_metadata('protobuf').split('.')
+get_message_class_supported = int(protobuf_version[0]) >= 4 and int(protobuf_version[1]) >= 22
 if get_message_class_supported:
     from google.protobuf.message_factory import GetMessageClass
 
