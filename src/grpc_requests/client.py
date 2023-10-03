@@ -15,8 +15,23 @@ from .utils import describe_request, load_data
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict  # pylint: disable=no-name-in-module
+    import importlib.metadata
+
+    def get_metadata(package_name: str):
+        return importlib.metadata.version(package_name)
 else:
     from typing_extensions import TypedDict
+    import pkg_resources
+
+    def get_metadata(package_name: str):
+        return pkg_resources.get_distribution(package_name).version
+
+# Import GetMessageClass if protobuf version supports it
+protobuf_version = get_metadata('protobuf').split('.')
+get_message_class_supported = int(protobuf_version[0]) >= 4 and int(protobuf_version[1]) >= 22
+if get_message_class_supported:
+    from google.protobuf.message_factory import GetMessageClass
+
 logger = logging.getLogger(__name__)
 
 
@@ -201,10 +216,14 @@ class BaseGrpcClient(BaseClient):
             method_name = method_proto.name
             method_desc: MethodDescriptor = service_descriptor.methods_by_name[method_name]
 
-            msg_factory = message_factory.MessageFactory(method_proto)
+            if get_message_class_supported:
+                input_type = GetMessageClass(method_desc.input_type)
+                output_type = GetMessageClass(method_desc.output_type)
+            else:
+                msg_factory = message_factory.MessageFactory(method_proto)
+                input_type = msg_factory.GetPrototype(method_desc.input_type)
+                output_type = msg_factory.GetPrototype(method_desc.output_type)
 
-            input_type = msg_factory.GetPrototype(method_desc.input_type)
-            output_type = msg_factory.GetPrototype(method_desc.output_type)
             method_type = MethodTypeMatch[(method_proto.client_streaming, method_proto.server_streaming)]
 
             method_register_func = getattr(self.channel, method_type.value)
