@@ -5,18 +5,33 @@ from functools import partial
 from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Tuple, TypeVar, Union
 
 import grpc
-from google.protobuf import descriptor_pb2, descriptor_pool as _descriptor_pool, symbol_database as _symbol_database
+from google.protobuf import descriptor_pb2, descriptor_pool as _descriptor_pool, message_factory
 from google.protobuf.descriptor import MethodDescriptor, ServiceDescriptor
 from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.json_format import MessageToDict, ParseDict
 from grpc_reflection.v1alpha import reflection_pb2, reflection_pb2_grpc
 
-from .utils import load_data
+from .utils import describe_request, load_data
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict  # pylint: disable=no-name-in-module
+    import importlib.metadata
+
+    def get_metadata(package_name: str):
+        return importlib.metadata.version(package_name)
 else:
     from typing_extensions import TypedDict
+    import pkg_resources
+
+    def get_metadata(package_name: str):
+        return pkg_resources.get_distribution(package_name).version
+
+# Import GetMessageClass if protobuf version supports it
+protobuf_version = get_metadata('protobuf').split('.')
+get_message_class_supported = int(protobuf_version[0]) >= 4 and int(protobuf_version[1]) >= 22
+if get_message_class_supported:
+    from google.protobuf.message_factory import GetMessageClass
+
 logger = logging.getLogger(__name__)
 
 
@@ -54,7 +69,6 @@ class BaseClient:
                  compression=None, credentials: Optional[CredentialsInfo] = None, **kwargs):
         self.endpoint = endpoint
         self._desc_pool = descriptor_pool or _descriptor_pool.Default()
-        self._symbol_db = symbol_db or _symbol_database.Default()
         self.compression = compression
         self.channel_options = channel_options
         if ssl:
@@ -86,7 +100,7 @@ class BaseClient:
         try:
             self._channel._close()
         except Exception as e:  # pylint: disable=bare-except
-            logger.warning('can not closed channel', exc_info=e)
+            logger.warning('can not close channel', exc_info=e)
         return False
 
     def __del__(self):
@@ -97,8 +111,8 @@ class BaseClient:
                 logger.warning('can not delete channel', exc_info=e)
 
 
-def parse_request_data(reqeust_data, input_type):
-    _data = reqeust_data or {}
+def parse_request_data(request_data, input_type):
+    _data = request_data or {}
     request = ParseDict(_data, input_type()) if isinstance(_data, dict) else _data
     return request
 
@@ -202,8 +216,14 @@ class BaseGrpcClient(BaseClient):
             method_name = method_proto.name
             method_desc: MethodDescriptor = service_descriptor.methods_by_name[method_name]
 
-            input_type = self._symbol_db.GetPrototype(method_desc.input_type)
-            output_type = self._symbol_db.GetPrototype(method_desc.output_type)
+            if get_message_class_supported:
+                input_type = GetMessageClass(method_desc.input_type)
+                output_type = GetMessageClass(method_desc.output_type)
+            else:
+                msg_factory = message_factory.MessageFactory(method_proto)
+                input_type = msg_factory.GetPrototype(method_desc.input_type)
+                output_type = msg_factory.GetPrototype(method_desc.output_type)
+
             method_type = MethodTypeMatch[(method_proto.client_streaming, method_proto.server_streaming)]
 
             method_register_func = getattr(self.channel, method_type.value)
@@ -286,6 +306,9 @@ class BaseGrpcClient(BaseClient):
     def get_service_descriptor(self, service):
         return self._desc_pool.FindServiceByName(service)
 
+    def describe_method_request(self, service, method):
+        return describe_request(self.get_method_descriptor(service, method))
+
     def get_method_descriptor(self, service, method):
         svc_desc = self.get_service_descriptor(service)
         return svc_desc.FindMethodByName(method)
@@ -306,7 +329,7 @@ class BaseGrpcClient(BaseClient):
         if name in self.service_names:
             return ServiceClient(client=self, service_name=name)
         else:
-            raise ValueError(f"{name} doesn't support. Available service {self.service_names}")
+            raise ValueError(f"{name} is not a supported service. Available services are {self.service_names}")
 
 
 class ReflectionClient(BaseGrpcClient):
@@ -362,7 +385,7 @@ class ReflectionClient(BaseGrpcClient):
         try:
             self._desc_pool.Add(file_descriptor)
         except TypeError:
-            logger.warning(f"{file_descriptor.name} already present in pool. Skipping.")
+            logger.debug(f"{file_descriptor.name} already present in pool. Skipping.")
         logger.debug(f"end {file_descriptor.name} register")
 
     def register_service(self, service_name):
@@ -377,7 +400,7 @@ class ReflectionClient(BaseGrpcClient):
                 file_descriptor = self._get_file_descriptor_by_symbol(service_name)
                 self._register_file_descriptor(file_descriptor)
             except Exception as e:
-                logger.warning(f"registered {service_name} failed, may be already registered", exc_info=e)
+                logger.debug(f"registered {service_name} failed, may be already registered", exc_info=e)
             logger.debug(f"end {service_name} register")
         else:
             logger.debug(f"{service_name} is already register")

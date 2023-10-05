@@ -3,8 +3,8 @@ from grpc_reflection.v1alpha import reflection
 
 import grpc
 import logging
-from ..test_protos.helloworld_pb2_grpc import GreeterServicer, add_GreeterServicer_to_server
-from ..test_protos.helloworld_pb2 import HelloReply, DESCRIPTOR
+from .helloworld_pb2_grpc import GreeterServicer, add_GreeterServicer_to_server
+from .helloworld_pb2 import HelloReply, DESCRIPTOR
 
 class Greeter(GreeterServicer):
 
@@ -60,9 +60,9 @@ class HelloWorldServer():
         self.server.add_insecure_port(f'[::]:{port}')
 
     def serve(self):
-        logging.warning('Start the server?')
+        logging.debug('Server starting...')
         self.server.start()
-        logging.warning('Server running')
+        logging.debug('Server running...')
         self.server.wait_for_termination()
 
     def shutdown(self):
