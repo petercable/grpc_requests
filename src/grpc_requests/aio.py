@@ -5,7 +5,7 @@ from functools import partial
 from typing import Any, AsyncIterable, Dict, Iterable, List, NamedTuple, Optional, Tuple, TypeVar
 
 import grpc
-from google.protobuf import descriptor_pb2, descriptor_pool as _descriptor_pool, symbol_database as _symbol_database, message_factory
+from google.protobuf import descriptor_pb2, descriptor_pool as _descriptor_pool, symbol_database as _symbol_database, message_factory  # noqa: E501
 from google.protobuf.descriptor import MethodDescriptor, ServiceDescriptor
 from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.json_format import MessageToDict, ParseDict
@@ -16,13 +16,11 @@ from .utils import load_data
 logger = logging.getLogger(__name__)
 
 if sys.version_info >= (3, 8):
-    from typing import TypedDict  # pylint: disable=no-name-in-module
     import importlib.metadata
 
     def get_metadata(package_name: str):
         return importlib.metadata.version(package_name)
 else:
-    from typing_extensions import TypedDict
     import pkg_resources
 
     def get_metadata(package_name: str):
