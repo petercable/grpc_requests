@@ -324,11 +324,11 @@ class BaseAsyncGrpcClient(BaseAsyncClient):
         }
 
     async def service(self, name):
-        if name in await self.service_names():
+        available_services = await self.service_names()
+        if name in available_services:
             return await ServiceClient.create(client=self, service_name=name)
         else:
-            service_names = await self.service_names()
-            raise ValueError(name + " doesn't support. Available service " + str(service_names))
+            raise ValueError(name + " is not supported. Available services are: " + str(available_services))
 
 
 class ReflectionAsyncClient(BaseAsyncGrpcClient):

@@ -5,58 +5,46 @@ from grpc_requests.aio import AsyncClient
 from google.protobuf.json_format import ParseError
 
 """
-Test cases for reflection based client
+Test cases for async reflection based client
 """
 
 logger = logging.getLogger('name')
 
-@pytest.fixture(scope="module")
-def helloworld_reflection_client():
-    try:
-        client = AsyncClient.get_by_endpoint('localhost:50051')
-        yield client
-    except:  # noqa: E722
-        pytest.fail("Could not connect to local HelloWorld server")
-
-@pytest.fixture(scope="module")
-def client_tester_reflection_client():
-    try:
-        client = AsyncClient.get_by_endpoint('localhost:50051')
-        yield client
-    except:  # noqa: E722
-        pytest.fail("Could not connect to local Test server")
-
 @pytest.mark.asyncio
-async def test_unary_unary(helloworld_reflection_client):
-    response = await helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {"name": "sinsky"})
+async def test_unary_unary():
+    client = AsyncClient('localhost:50051')
+    greeter_service = await client.service('helloworld.Greeter')
+    response = await greeter_service.SayHello({"name": "sinsky"})
     assert isinstance(response, dict)
     assert response == {"message": "Hello, sinsky!"}
 
 @pytest.mark.asyncio
-async def test_empty_body_request(helloworld_reflection_client):
-    response = await helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {})
+async def test_empty_body_request():
+    client = AsyncClient('localhost:50051')
+    greeter_service = await client.service('helloworld.Greeter')
+    response = await greeter_service.SayHello({})
     assert isinstance(response, dict)
 
 @pytest.mark.asyncio
-async def test_nonexistent_service(helloworld_reflection_client):
-    with pytest.raises(ValueError):
-        await helloworld_reflection_client.request('helloworld.Speaker', 'SingHello', {})
+async def test_nonexistent_method():
+    client = AsyncClient('localhost:50051')
+    greeter_service = await client.service('helloworld.Greeter')
+    with pytest.raises(AttributeError):
+        await greeter_service.SayGoodbye({})
 
 @pytest.mark.asyncio
-async def test_nonexistent_method(helloworld_reflection_client):
-    with pytest.raises(ValueError):
-        await helloworld_reflection_client.request('helloworld.Greeter', 'SayGoodbye', {})
-
-@pytest.mark.asyncio
-async def test_unsupported_argument(helloworld_reflection_client):
+async def test_unsupported_argument():
+    client = AsyncClient('localhost:50051')
+    greeter_service = await client.service('helloworld.Greeter')
     with pytest.raises(ParseError):
-        await helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {"foo": "bar"})
+        await greeter_service.SayHello({"foo": "bar"})
 
 @pytest.mark.asyncio
-async def test_unary_stream(helloworld_reflection_client):
+async def test_unary_stream():
+    client = AsyncClient('localhost:50051')
+    greeter_service = await client.service('helloworld.Greeter')
     name_list = ["sinsky", "viridianforge", "jack", "harry"]
-    greeter = await helloworld_reflection_client.service('helloworld.Greeter')
-    responses = [x async for x in await greeter.SayHelloGroup(
+    responses = [x async for x in await greeter_service.SayHelloGroup(
         [{"name": name} for name in name_list]
     )]
     assert all(isinstance(response, dict) for response in responses)
@@ -64,29 +52,33 @@ async def test_unary_stream(helloworld_reflection_client):
         assert response == {"message": f"Hello, {name}!"}
 
 @pytest.mark.asyncio
-async def test_stream_unary(helloworld_reflection_client):
+async def test_stream_unary():
+    client = AsyncClient('localhost:50051')
+    greeter_service = await client.service('helloworld.Greeter')
     name_list = ["sinsky", "viridianforge", "jack", "harry"]
-    greeter = await helloworld_reflection_client.service('helloworld.Greeter')
-    response = await greeter.HelloEveryone([{"name": name} for name in name_list])
+    response = await greeter_service.HelloEveryone([{"name": name} for name in name_list])
     assert isinstance(response, dict)
     assert response == {'message': f'Hello, {" ".join(["sinsky", "viridianforge", "jack", "harry"])}!'}
 
 @pytest.mark.asyncio
-async def test_stream_stream(helloworld_reflection_client):
+async def test_stream_stream():
+    client = AsyncClient('localhost:50051')
+    greeter_service = await client.service('helloworld.Greeter')
     name_list = ["sinsky", "viridianforge", "jack", "harry"]
-    greeter = await helloworld_reflection_client.service('helloworld.Greeter')
-    responses = [x async for x in await greeter.SayHelloOneByOne([{"name": name} for name in name_list])]
+    responses = [x async for x in await greeter_service.SayHelloOneByOne([{"name": name} for name in name_list])]
     assert all(isinstance(response, dict) for response in responses)
     for response, name in zip(responses, name_list):
         assert response == {"message": f"Hello {name}"}
 
 @pytest.mark.asyncio
-async def test_reflection_service_client(helloworld_reflection_client):
-    svc_client = await helloworld_reflection_client.service('helloworld.Greeter')
-    method_names = svc_client.method_names
+async def test_reflection_service_client():
+    client = AsyncClient('localhost:50051')
+    greeter_service = await client.service('helloworld.Greeter')
+    method_names = greeter_service.method_names
     assert method_names == ('SayHello', 'SayHelloGroup', 'HelloEveryone', 'SayHelloOneByOne')
 
 @pytest.mark.asyncio
-async def test_reflection_service_client_invalid_service(helloworld_reflection_client):
+async def test_reflection_service_client_invalid_service():
+    client = AsyncClient('localhost:50051')
     with pytest.raises(ValueError):
-        await helloworld_reflection_client.service('helloWorld.Singer')
+        await client.service('helloWorld.Singer')
