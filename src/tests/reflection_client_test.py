@@ -47,6 +47,16 @@ def test_describe_method_request(client_tester_reflection_client):
         request_description == expected_request_description
     ), f"Expected: {expected_request_description}, Actual: {request_description}"
 
+def test_describe_request(client_tester_reflection_client):
+    request_description = \
+        client_tester_reflection_client.describe_request('client_tester.ClientTester', 'TestUnaryUnary')
+    assert request_description == 'client_tester.ClientTester.TestUnaryUnaryRequest'
+
+def test_describe_response(client_tester_reflection_client):
+    request_description = \
+        client_tester_reflection_client.describe_response('client_tester.ClientTester', 'TestUnaryUnary')
+    assert request_description == 'client_tester.ClientTester.TestUnaryUnaryResponse'
+
 def test_empty_body_request(helloworld_reflection_client):
     response = helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {})
     assert isinstance(response, dict)
