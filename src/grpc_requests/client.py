@@ -308,12 +308,15 @@ class BaseGrpcClient(BaseClient):
         return self._desc_pool.FindServiceByName(service)
 
     def describe_method_request(self, service, method):
-        warnings.warn("This function is deprecated, and will be removed in a future release. Use describe_request() instead.", DeprecationWarning)
+        warnings.warn(
+            "This function is deprecated, and will be removed in a future release. Use describe_request() instead.",
+            DeprecationWarning
+        )
         return describe_request(self.get_method_descriptor(service, method))
-    
+
     def describe_request(self, service, method):
         return describe_descriptor(self.get_method_descriptor(service, method).input_type)
-    
+
     def describe_response(self, service, method):
         return describe_descriptor(self.get_method_descriptor(service, method).output_type)
 
