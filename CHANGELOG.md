@@ -5,7 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.12]() - 2023-11-25
+## [0.1.12](pending) - Pending
+
+## Added
+
+- Method to print out a generic descriptor added to utils collection
+- Helper methods to print out a method's request and responses in a human readable format
+
+## Changed
+
+- Documentation revamped
+- Version checks to avoid using deprecated methods added to async client
+
+## Deprecated
+
+- Method to retrieve fields for the descriptor of a method's input type.
 
 ## Added
 

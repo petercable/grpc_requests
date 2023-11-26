@@ -58,7 +58,7 @@ usage scenarioes, and the [unit tests](./src/tests/) are also a useful reference
 
 Contributions from the community are welcomed and greatly appreciated.
 
-Before opening a PR, `tests.sh` can be used to ensure the contribution passes
+Before opening a PR, [tests.sh](./tests.sh) can be used to ensure the contribution passes
 linting and unit test checks.
 
 PRs should be targeted to merge with the `develop` branch. When opening a PR,
