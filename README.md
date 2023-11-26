@@ -18,8 +18,8 @@ client = Client.get_by_endpoint("localhost:50051")
 assert client.service_names == ["helloworld.Greeter"]
 
 request_data = {"name": "sinsky"} 
-result = client.request("helloworld.Greeter", "SayHello", request_data)
-print(result) # {"message":"Hello sinsky"}
+say_hello_response = client.request("helloworld.Greeter", "SayHello", request_data)
+assert say_hello_response ==  {"message":"Hello sinsky!"}
 ```
 
 ## Features
@@ -38,15 +38,32 @@ pip install grpc_requests
 
 ## Usage
 
-Please read over our [examples page](src/examples/examples.md) for a deeper
-dive into how to utilize the library.
+In short:
+
+Instantiate a client using the URL of a GRPC server and any authentication
+credentials you may need. If the server utilizes SSL (and it probably does)
+make sure to toggle that flag.
+
+```python
+from grpc_requests import Client
+
+metadata = [{"authorization":"bearer my.cool.jwt"}]
+client = Client.get_by_endpoint("cool.servers.arecool:443", ssl=True, metadata=metadata)
+```
+
+The [examples page](./src/examples/README.md) provides more thorough examples of
+usage scenarioes, and the [unit tests](./src/tests/) are also a useful reference point.
 
 ## Contributing
 
-We welcome community contributions.
+Contributions from the community are welcomed and greatly appreciated.
 
-When doing so - please target your pull requests to the `develop` branch
-and assign the PR to a maintainer for review. We'll take it from there.
+Before opening a PR, `tests.sh` can be used to ensure the contribution passes
+linting and unit test checks.
+
+PRs should be targeted to merge with the `develop` branch. When opening a PR,
+please assign it to a maintainer for review. The maintainers will take it from
+there.
 
 ## Questions, Comments, Issues?
 
@@ -57,4 +74,4 @@ For feature requests or bugs, please open an [issue](https://github.com/wesky93/
 ## Maintainers
 
 - sinsky - [wesky93](https://github.com/wesky93)
-- Wayne Manselle - [ViridianForge](https://github.com/ViridianForge)
+- Wayne Manselle - [ViridianForge](https://viridianforge.tech)
