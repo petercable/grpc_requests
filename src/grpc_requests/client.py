@@ -1,12 +1,15 @@
 import logging
 import sys
+import warnings
 from enum import Enum
 from functools import partial
-from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Tuple, TypeVar, Union
-import warnings
+from typing import (Any, Dict, Iterable, List, NamedTuple, Optional, Tuple,
+                    TypeVar, Union)
 
 import grpc
-from google.protobuf import descriptor_pb2, descriptor_pool as _descriptor_pool, message_factory
+from google.protobuf import descriptor_pb2
+from google.protobuf import descriptor_pool as _descriptor_pool
+from google.protobuf import message_factory
 from google.protobuf.descriptor import MethodDescriptor, ServiceDescriptor
 from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.json_format import MessageToDict, ParseDict
@@ -15,14 +18,14 @@ from grpc_reflection.v1alpha import reflection_pb2, reflection_pb2_grpc
 from .utils import describe_descriptor, describe_request, load_data
 
 if sys.version_info >= (3, 8):
-    from typing import TypedDict  # pylint: disable=no-name-in-module
     import importlib.metadata
+    from typing import TypedDict  # pylint: disable=no-name-in-module
 
     def get_metadata(package_name: str):
         return importlib.metadata.version(package_name)
 else:
-    from typing_extensions import TypedDict
     import pkg_resources
+    from typing_extensions import TypedDict
 
     def get_metadata(package_name: str):
         return pkg_resources.get_distribution(package_name).version
@@ -383,6 +386,13 @@ class ReflectionClient(BaseGrpcClient):
 
     def _register_file_descriptor(self, file_descriptor):
         logger.debug(f"start {file_descriptor.name} register")
+        try:
+            self._desc_pool.FindFileByName(file_descriptor.name)
+        except KeyError:
+            pass
+        else:
+            logger.debug(f'{file_descriptor.name} already registered')
+            return
         dependencies = list(file_descriptor.dependency)
         logger.debug(f"find {len(dependencies)} dependency in {file_descriptor.name}")
         for dep_file_name in dependencies:

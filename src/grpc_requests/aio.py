@@ -365,6 +365,13 @@ class ReflectionAsyncClient(BaseAsyncGrpcClient):
 
     async def _register_file_descriptor(self, file_descriptor):
         logger.debug(f"start {file_descriptor.name} register")
+        try:
+            self._desc_pool.FindFileByName(file_descriptor.name)
+        except KeyError:
+            pass
+        else:
+            logger.debug(f'{file_descriptor.name} already registered')
+            return
         dependencies = list(file_descriptor.dependency)
         logger.debug(f"find {len(dependencies)} dependency in {file_descriptor.name}")
         for dep_file_name in dependencies:
