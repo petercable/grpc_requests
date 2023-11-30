@@ -352,7 +352,6 @@ class ReflectionClient(BaseGrpcClient):
                  **kwargs):
         super().__init__(endpoint, symbol_db, descriptor_pool, ssl=ssl, lazy=lazy, compression=compression, **kwargs)
         self.reflection_stub = reflection_pb2_grpc.ServerReflectionStub(self.channel)
-        self.registered_file_names = set()
         if not self._lazy:
             self.register_all_service()
 
@@ -403,7 +402,6 @@ class ReflectionClient(BaseGrpcClient):
             if not self._is_descriptor_registered(dep_file_name):
                 dep_desc = self._get_file_descriptor_by_name(dep_file_name)
                 self._register_file_descriptor(dep_desc)
-                self.registered_file_names.add(dep_file_name)
         try:
             self._desc_pool.Add(file_descriptor)
         except TypeError:
