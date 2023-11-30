@@ -384,25 +384,26 @@ class ReflectionClient(BaseGrpcClient):
         proto = result.file_descriptor_response.file_descriptor_proto[0]
         return descriptor_pb2.FileDescriptorProto.FromString(proto)
 
+    def _is_descriptor_registered(self, filename):
+        try:
+            self._desc_pool.FindFileByName(filename)
+        except KeyError:
+            return False
+        else:
+            logger.debug(f'{filename} already registered')
+            return True
+
     def _register_file_descriptor(self, file_descriptor):
         logger.debug(f"start {file_descriptor.name} register")
-        try:
-            self._desc_pool.FindFileByName(file_descriptor.name)
-        except KeyError:
-            pass
-        else:
-            logger.debug(f'{file_descriptor.name} already registered')
+        if self._is_descriptor_registered(file_descriptor.name):
             return
         dependencies = list(file_descriptor.dependency)
         logger.debug(f"find {len(dependencies)} dependency in {file_descriptor.name}")
         for dep_file_name in dependencies:
-            if dep_file_name not in self.registered_file_names:
+            if not self._is_descriptor_registered(dep_file_name):
                 dep_desc = self._get_file_descriptor_by_name(dep_file_name)
                 self._register_file_descriptor(dep_desc)
                 self.registered_file_names.add(dep_file_name)
-            else:
-                logger.debug(f'{dep_file_name} already registered')
-
         try:
             self._desc_pool.Add(file_descriptor)
         except TypeError:
