@@ -335,7 +335,6 @@ class ReflectionAsyncClient(BaseAsyncGrpcClient):
                  **kwargs):
         super().__init__(endpoint, symbol_db, descriptor_pool, ssl=ssl, compression=compression, **kwargs)
         self.reflection_stub = reflection_pb2_grpc.ServerReflectionStub(self.channel)
-        self.registered_file_names = set()
 
     def _reflection_request(self, *requests):
         responses = self.reflection_stub.ServerReflectionInfo((r for r in requests))
@@ -363,19 +362,29 @@ class ReflectionAsyncClient(BaseAsyncGrpcClient):
         proto = result.file_descriptor_response.file_descriptor_proto[0]
         return descriptor_pb2.FileDescriptorProto.FromString(proto)
 
+    def _is_descriptor_registered(self, filename):
+        try:
+            self._desc_pool.FindFileByName(filename)
+        except KeyError:
+            return False
+        else:
+            logger.debug(f'{filename} already registered')
+            return True
+
     async def _register_file_descriptor(self, file_descriptor):
         logger.debug(f"start {file_descriptor.name} register")
+        if self._is_descriptor_registered(file_descriptor.name):
+            return
         dependencies = list(file_descriptor.dependency)
         logger.debug(f"find {len(dependencies)} dependency in {file_descriptor.name}")
         for dep_file_name in dependencies:
-            if dep_file_name not in self.registered_file_names:
+            if not self._is_descriptor_registered(dep_file_name):
                 dep_desc = await self._get_file_descriptor_by_name(dep_file_name)
                 await self._register_file_descriptor(dep_desc)
-                self.registered_file_names.add(dep_file_name)
-            else:
-                logger.debug(f'{dep_file_name} already registered')
-
-        self._desc_pool.Add(file_descriptor)
+        try:
+            self._desc_pool.Add(file_descriptor)
+        except TypeError:
+            logger.debug(f"{file_descriptor.name} already present in pool. Skipping.")
         logger.debug(f"end {file_descriptor.name} register")
 
     async def register_service(self, service_name):
