@@ -13,6 +13,7 @@ from grpc_reflection.v1alpha import reflection_pb2, reflection_pb2_grpc
 
 from .client import CredentialsInfo
 from .utils import load_data
+
 logger = logging.getLogger(__name__)
 
 if sys.version_info >= (3, 8):
@@ -55,7 +56,7 @@ def reflection_request(channel, requests):
 
 class BaseAsyncClient:
     def __init__(self, endpoint, symbol_db=None, descriptor_pool=None, channel_options=None, ssl=False,
-                 compression=None, credentials: Optional[CredentialsInfo] = None, **kwargs):
+                 compression=None, credentials: Optional[CredentialsInfo] = None, interceptors=None, **kwargs):
         self.endpoint = endpoint
         self._symbol_db = symbol_db or _symbol_database.Default()
         self._desc_pool = descriptor_pool or _descriptor_pool.Default()
@@ -71,10 +72,13 @@ class BaseAsyncClient:
 
             self._channel = grpc.aio.secure_channel(endpoint, grpc.ssl_channel_credentials(**_credentials),
                                                     options=self.channel_options,
-                                                    compression=self.compression)
+                                                    compression=self.compression,
+                                                    interceptors=interceptors)
+
         else:
             self._channel = grpc.aio.insecure_channel(endpoint, options=self.channel_options,
-                                                      compression=self.compression)
+                                                      compression=self.compression,
+                                                      interceptors=interceptors)
 
     @property
     def channel(self):

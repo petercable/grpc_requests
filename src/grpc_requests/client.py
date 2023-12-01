@@ -70,7 +70,7 @@ class CredentialsInfo(TypedDict):
 
 class BaseClient:
     def __init__(self, endpoint, symbol_db=None, descriptor_pool=None, channel_options=None, ssl=False,
-                 compression=None, credentials: Optional[CredentialsInfo] = None, **kwargs):
+                 compression=None, credentials: Optional[CredentialsInfo] = None, interceptors=None, **kwargs):
         self.endpoint = endpoint
         self._desc_pool = descriptor_pool or _descriptor_pool.Default()
         self.compression = compression
@@ -88,6 +88,9 @@ class BaseClient:
                                                 compression=self.compression)
         else:
             self._channel = grpc.insecure_channel(endpoint, options=self.channel_options, compression=self.compression)
+
+        if interceptors:
+            self._channel = grpc.intercept_channel(self._channel, *interceptors)
 
     @property
     def channel(self):
