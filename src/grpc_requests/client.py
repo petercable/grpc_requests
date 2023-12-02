@@ -248,10 +248,13 @@ class BaseGrpcClient(BaseClient):
         return metadata
 
     def register_service(self, service_name):
-        logger.debug(f"start {service_name} register")
-        svc_desc = self._desc_pool.FindServiceByName(service_name)
-        self._service_methods_meta[service_name] = self._register_methods(svc_desc)
-        logger.debug(f"end {service_name} register")
+        logger.debug(f"start {service_name} registration")
+        try:
+            svc_desc = self._desc_pool.FindServiceByName(service_name)
+            self._service_methods_meta[service_name] = self._register_methods(svc_desc)
+        except KeyError:
+            logger.debug(f"{service_name} not found in descriptor pool, methods will not be registered")
+        logger.debug(f"end {service_name} registration")
 
     def register_all_service(self):
         for service in self.service_names:
