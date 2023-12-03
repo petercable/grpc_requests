@@ -201,7 +201,9 @@ class BaseGrpcClient(BaseClient):
     def check_method_available(self, service, method, method_type: MethodType = None):
         if not self.has_server_registered:
             self.register_all_service()
+        print(service)
         methods_meta = self._service_methods_meta.get(service)
+        print(methods_meta)
         if not methods_meta:
             raise ValueError(
                 f"{self.endpoint} server doesn't support {service}. Available services {self.service_names}")
@@ -425,7 +427,7 @@ class ReflectionClient(BaseGrpcClient):
             file_descriptor = self._get_file_descriptor_by_symbol(service_name)
             self._register_file_descriptor(file_descriptor)
             logger.debug(f"{service_name} registration complete")
-            super(ReflectionClient, self).register_service(service_name)
+        super(ReflectionClient, self).register_service(service_name)
 
 
 class StubClient(BaseGrpcClient):
