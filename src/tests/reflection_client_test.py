@@ -1,7 +1,7 @@
 import logging
 import pytest
 
-from grpc_requests.client import Client
+from grpc_requests.client import Client, MethodType
 from google.protobuf.json_format import ParseError
 
 from tests.common import MetadataClientInterceptor
@@ -54,6 +54,10 @@ def test_interceptor_usage(helloworld_reflection_client_with_interceptor):
     assert isinstance(response, dict)
     assert response == {"message": "Hello, sinsky, interceptor accepted!"}
 
+def test_methods_meta(helloworld_reflection_client):
+    service = helloworld_reflection_client.service('helloworld.Greeter')
+    meta = service.methods_meta
+    assert meta['HelloEveryone'].method_type == MethodType.STREAM_UNARY
 
 def test_unary_unary(helloworld_reflection_client):
     response = helloworld_reflection_client.request('helloworld.Greeter', 'SayHello', {"name": "sinsky"})
