@@ -447,6 +447,11 @@ class StubClient(BaseGrpcClient):
 
 
 class ServiceClient:
+    _method_names: Tuple[str, ...]
+    _methods_meta: Dict[str, MethodMetaData]
+    client: BaseGrpcClient
+    name: str
+
     def __init__(self, client: BaseGrpcClient, service_name: str):
         self.client = client
         self.name = service_name
@@ -461,6 +466,10 @@ class ServiceClient:
     @property
     def method_names(self):
         return self._method_names
+
+    @property
+    def methods_meta(self):
+        return self._methods_meta
 
 
 Client = ReflectionClient

@@ -1,7 +1,7 @@
 import logging
 import pytest
 
-from grpc_requests.aio import AsyncClient
+from grpc_requests.aio import AsyncClient, MethodType
 from google.protobuf.json_format import ParseError
 
 from tests.common import AsyncMetadataClientInterceptor
@@ -27,6 +27,13 @@ async def test_unary_unary_interceptor():
     response = await greeter_service.SayHello({"name": "sinsky"})
     assert isinstance(response, dict)
     assert response == {"message": "Hello, sinsky, interceptor accepted!"}
+
+@pytest.mark.asyncio
+async def test_methods_meta():
+    client = AsyncClient('localhost:50051', interceptors=[AsyncMetadataClientInterceptor()])
+    greeter_service = await client.service('helloworld.Greeter')
+    meta = greeter_service.methods_meta
+    assert meta['HelloEveryone'].method_type == MethodType.STREAM_UNARY
 
 @pytest.mark.asyncio
 async def test_empty_body_request():
