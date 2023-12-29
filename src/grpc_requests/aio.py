@@ -196,6 +196,7 @@ class MethodMetaData(NamedTuple):
     output_type: Any
     method_type: MethodType
     handler: Any
+    descriptor: MethodDescriptor
 
 
 IS_REQUEST_STREAM = TypeVar("IS_REQUEST_STREAM")
@@ -302,6 +303,7 @@ class BaseAsyncGrpcClient(BaseAsyncClient):
                 input_type=input_type,
                 output_type=output_type,
                 handler=handler,
+                descriptor=method_desc,
             )
         return metadata
 
@@ -445,6 +447,9 @@ class ReflectionAsyncClient(BaseAsyncGrpcClient):
         resp = await self._reflection_single_request(request)
         services = tuple([s.name for s in resp.list_services_response.service])
         return services
+    
+    async def get_service_descriptor(self, service_name: str):
+       return self._service_descriptors.get(service_name)
 
     async def _get_file_descriptor_by_name(self, name):
         request = reflection_pb2.ServerReflectionRequest(file_by_filename=name)
@@ -526,7 +531,9 @@ class StubAsyncClient(BaseAsyncGrpcClient):
     async def _get_service_names(self):
         svcs = [x.full_name for x in self.service_descriptors]
         return svcs
-
+    
+    async def get_service_descriptor(self, service_name: str):
+       return self._service_descriptors.get(service_name)
 
 class ServiceClient:
     _method_names: Tuple[str, ...]

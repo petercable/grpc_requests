@@ -19,7 +19,7 @@ import grpc
 from google.protobuf import descriptor_pb2
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message_factory
-from google.protobuf.descriptor import MethodDescriptor, ServiceDescriptor
+from google.protobuf.descriptor import MethodDescriptor, ServiceDescriptor, FileDescriptor
 from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.json_format import MessageToDict, ParseDict
 from grpc_reflection.v1alpha import reflection_pb2, reflection_pb2_grpc
@@ -195,6 +195,7 @@ class MethodMetaData(NamedTuple):
     output_type: Any
     method_type: MethodType
     handler: Any
+    descriptor: MethodDescriptor
 
 
 IS_REQUEST_STREAM = TypeVar("IS_REQUEST_STREAM")
@@ -244,9 +245,9 @@ class BaseGrpcClient(BaseClient):
     def check_method_available(self, service, method, method_type: MethodType = None):
         if not self.has_server_registered:
             self.register_all_service()
-        print(service)
+        logger.debug(service)
         methods_meta = self._service_methods_meta.get(service)
-        print(methods_meta)
+        logger.debug(methods_meta)
         if not methods_meta:
             raise ValueError(
                 f"{self.endpoint} server doesn't support {service}. Available services {self.service_names}"
@@ -298,6 +299,7 @@ class BaseGrpcClient(BaseClient):
                 input_type=input_type,
                 output_type=output_type,
                 handler=handler,
+                descriptor=method_desc,
             )
         return metadata
 
@@ -305,6 +307,7 @@ class BaseGrpcClient(BaseClient):
         logger.debug(f"start {service_name} registration")
         try:
             svc_desc = self._desc_pool.FindServiceByName(service_name)
+            self._service_descriptors[service_name] = svc_desc
             self._service_methods_meta[service_name] = self._register_methods(svc_desc)
         except KeyError:
             logger.debug(
@@ -374,9 +377,6 @@ class BaseGrpcClient(BaseClient):
         self.check_method_available(service, method, MethodType.STREAM_STREAM)
         return self._request(service, method, requests, raw_output, **kwargs)
 
-    def get_service_descriptor(self, service):
-        return self._desc_pool.FindServiceByName(service)
-
     def describe_method_request(self, service, method):
         warnings.warn(
             "This function is deprecated, and will be removed in a future release. Use describe_request() instead.",
@@ -393,6 +393,9 @@ class BaseGrpcClient(BaseClient):
         return describe_descriptor(
             self.get_method_descriptor(service, method).output_type
         )
+    
+    def get_service_descriptor(self, service):
+        return self._desc_pool.FindServiceByName(service)
 
     def get_method_descriptor(self, service, method):
         svc_desc = self.get_service_descriptor(service)
@@ -425,6 +428,7 @@ class ReflectionClient(BaseGrpcClient):
         endpoint,
         symbol_db=None,
         descriptor_pool=None,
+        service_descriptors: List[ServiceDescriptor] = [],
         lazy=False,
         ssl=False,
         compression=None,
@@ -491,6 +495,7 @@ class ReflectionClient(BaseGrpcClient):
                 self._register_file_descriptor(dep_desc)
             try:
                 self._desc_pool.Add(file_descriptor)
+                self._file_descriptors[file_descriptor.name] = file_descriptor
             except TypeError:
                 logger.debug(
                     f"{file_descriptor.name} already present in pool. Skipping."
@@ -518,7 +523,6 @@ class StubClient(BaseGrpcClient):
     def __init__(
         self,
         endpoint,
-        service_descriptors: List[ServiceDescriptor],
         symbol_db=None,
         lazy=False,
         descriptor_pool=None,
@@ -535,13 +539,12 @@ class StubClient(BaseGrpcClient):
             lazy=lazy,
             **kwargs,
         )
-        self.service_descriptors = service_descriptors
 
         if not self._lazy:
             self.register_all_service()
 
     def _get_service_names(self):
-        svcs = [x.full_name for x in self.service_descriptors]
+        svcs = [service.full_name for service in self._service_descriptors]
         return svcs
 
 

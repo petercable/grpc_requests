@@ -122,3 +122,43 @@ requests_data = [{"name": "sinsky"}]
 result = await greeter.HelloEveryone(requests_data)
 results = [x async for x in await greeter.SayHelloOneByOne(requests_data)]  
 ```
+
+## Retrieving Information about a Server
+
+All forms of clients expose methods to allow a user to query a server about its
+provided services and their methods.
+
+Examples are provided using the Client type, but the same methods are on the
+AsyncClient as well.
+
+### Retrieving Descriptors from a Server
+
+```python
+from grpc_requests.client import Client
+
+client = Client("localhost:50051")
+
+greeterServiceDescriptor = client.get_service_descriptor("helloworld.Greeter")
+sayHelloDescriptor = client.get_method_descriptor("helloworld.Greeter","SayHello")
+
+#Examples of things to do with descriptors
+#Filedescriptors?
+```
+
+### Describing Methods
+
+grpc_requests utilizes a method metadata object to make interacting with service
+methods easier. Additional methods are offered to better describe the request to
+and response from a given method.
+
+```python
+from grpc_requests.client import Client
+
+client = Client("localhost:50051")
+
+sayHelloMethodMeta = client.get_method_meta("helloworld.Greeter", "SayHello")
+
+#Metadata Example
+
+# Example of Describing a Request and Response for a Method
+```
