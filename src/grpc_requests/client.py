@@ -307,7 +307,6 @@ class BaseGrpcClient(BaseClient):
         logger.debug(f"start {service_name} registration")
         try:
             svc_desc = self._desc_pool.FindServiceByName(service_name)
-            self._service_descriptors[service_name] = svc_desc
             self._service_methods_meta[service_name] = self._register_methods(svc_desc)
         except KeyError:
             logger.debug(
@@ -523,6 +522,7 @@ class StubClient(BaseGrpcClient):
     def __init__(
         self,
         endpoint,
+        service_descriptors: List[ServiceDescriptor],
         symbol_db=None,
         lazy=False,
         descriptor_pool=None,
@@ -539,12 +539,13 @@ class StubClient(BaseGrpcClient):
             lazy=lazy,
             **kwargs,
         )
+        self.service_descriptors = service_descriptors
 
         if not self._lazy:
             self.register_all_service()
 
     def _get_service_names(self):
-        svcs = [service.full_name for service in self._service_descriptors]
+        svcs = [service.full_name for service in self.service_descriptors]
         return svcs
 
 
