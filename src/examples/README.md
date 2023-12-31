@@ -157,12 +157,16 @@ sayHelloMethodMetaData = client.get_method_meta("helloworld.Greeter", "SayHello"
 sayHelloInputType = sayHelloMethodMetaData.input_type
 sayHelloOutputType = sayHelloMethodMetaData.output_type
 sayHelloDescriptor = sayHelloMethodMetaData.descriptor
+
+assert sayHelloDescriptor.name == "SayHello"
+assert sayHelloDescriptor.containing_service.name == "helloworld.Greeter"
 ```
 
 ### Describing Requests and Responses
 
 grpc_requests makes available two experimental methods to provide users ways
-to retrieve better understood descriptions of the request and r
+to retrieve human readable descriptions of the request and response for implementer
+review.
 
 ```python
 from grpc_requests.client import Client
