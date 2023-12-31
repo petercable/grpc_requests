@@ -3,6 +3,7 @@ import pytest
 
 from grpc_requests.aio import AsyncClient, MethodType
 from google.protobuf.json_format import ParseError
+from google.protobuf.descriptor import MethodDescriptor
 
 from tests.common import AsyncMetadataClientInterceptor
 

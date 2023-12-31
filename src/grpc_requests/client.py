@@ -375,6 +375,9 @@ class BaseGrpcClient(BaseClient):
     def stream_stream(self, service, method, requests, raw_output=False, **kwargs):
         self.check_method_available(service, method, MethodType.STREAM_STREAM)
         return self._request(service, method, requests, raw_output, **kwargs)
+    
+    def get_service_descriptor(self, service):
+        return self._desc_pool.FindServiceByName(service)
 
     def describe_method_request(self, service, method):
         warnings.warn(
@@ -392,9 +395,6 @@ class BaseGrpcClient(BaseClient):
         return describe_descriptor(
             self.get_method_descriptor(service, method).output_type
         )
-    
-    def get_service_descriptor(self, service):
-        return self._desc_pool.FindServiceByName(service)
 
     def get_method_descriptor(self, service, method):
         svc_desc = self.get_service_descriptor(service)
@@ -427,7 +427,6 @@ class ReflectionClient(BaseGrpcClient):
         endpoint,
         symbol_db=None,
         descriptor_pool=None,
-        service_descriptors: List[ServiceDescriptor] = [],
         lazy=False,
         ssl=False,
         compression=None,

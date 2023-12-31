@@ -140,25 +140,38 @@ client = Client("localhost:50051")
 
 greeterServiceDescriptor = client.get_service_descriptor("helloworld.Greeter")
 sayHelloDescriptor = client.get_method_descriptor("helloworld.Greeter","SayHello")
-
-#Examples of things to do with descriptors
-#Filedescriptors?
 ```
 
-### Describing Methods
+### Method Metadata
 
-grpc_requests utilizes a method metadata object to make interacting with service
-methods easier. Additional methods are offered to better describe the request to
-and response from a given method.
+grpc_requests utilizes MethodMetaData objects to organize the methods of the
+services of the servers clients are built for.
 
 ```python
 from grpc_requests.client import Client
 
 client = Client("localhost:50051")
 
-sayHelloMethodMeta = client.get_method_meta("helloworld.Greeter", "SayHello")
+sayHelloMethodMetaData = client.get_method_meta("helloworld.Greeter", "SayHello")
 
-#Metadata Example
+sayHelloInputType = sayHelloMethodMetaData.input_type
+sayHelloOutputType = sayHelloMethodMetaData.output_type
+sayHelloDescriptor = sayHelloMethodMetaData.descriptor
+```
 
-# Example of Describing a Request and Response for a Method
+### Describing Requests and Responses
+
+grpc_requests makes available two experimental methods to provide users ways
+to retrieve better understood descriptions of the request and r
+
+```python
+from grpc_requests.client import Client
+
+client = Client("localhost:50051")
+
+sayHelloRequestDescription = client.describe_request("helloworld.Greeter", "SayHello")
+sayHelloResponseDescription = client.describe_response("helloworld.Greeter", "SayHello")
+
+print(sayHelloRequestDescription)
+print(sayHelloResponseDescription)
 ```
