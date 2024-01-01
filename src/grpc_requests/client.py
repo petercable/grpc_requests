@@ -19,7 +19,7 @@ import grpc
 from google.protobuf import descriptor_pb2
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message_factory
-from google.protobuf.descriptor import MethodDescriptor, ServiceDescriptor, FileDescriptor
+from google.protobuf.descriptor import MethodDescriptor, ServiceDescriptor
 from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.json_format import MessageToDict, ParseDict
 from grpc_reflection.v1alpha import reflection_pb2, reflection_pb2_grpc
@@ -375,7 +375,7 @@ class BaseGrpcClient(BaseClient):
     def stream_stream(self, service, method, requests, raw_output=False, **kwargs):
         self.check_method_available(service, method, MethodType.STREAM_STREAM)
         return self._request(service, method, requests, raw_output, **kwargs)
-    
+
     def get_service_descriptor(self, service):
         return self._desc_pool.FindServiceByName(service)
 

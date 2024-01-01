@@ -528,7 +528,7 @@ class StubAsyncClient(BaseAsyncGrpcClient):
     async def _get_service_names(self):
         svcs = [x.full_name for x in self.service_descriptors]
         return svcs
-    
+
 
 class ServiceClient:
     _method_names: Tuple[str, ...]
