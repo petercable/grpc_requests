@@ -493,7 +493,6 @@ class ReflectionClient(BaseGrpcClient):
                 self._register_file_descriptor(dep_desc)
             try:
                 self._desc_pool.Add(file_descriptor)
-                self._file_descriptors[file_descriptor.name] = file_descriptor
             except TypeError:
                 logger.debug(
                     f"{file_descriptor.name} already present in pool. Skipping."
