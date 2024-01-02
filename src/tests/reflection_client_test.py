@@ -3,6 +3,7 @@ import pytest
 
 from grpc_requests.client import Client, MethodType
 from google.protobuf.json_format import ParseError
+from google.protobuf.descriptor import MethodDescriptor
 
 from tests.common import MetadataClientInterceptor
 
@@ -186,3 +187,12 @@ def test_reflection_service_client(helloworld_reflection_client):
 def test_reflection_service_client_invalid_service(helloworld_reflection_client):
     with pytest.raises(ValueError):
         helloworld_reflection_client.service("helloWorld.Singer")
+
+
+def test_method_descriptor_on_meta(helloworld_reflection_client):
+    method_descriptor = helloworld_reflection_client.get_method_meta(
+        "helloworld.Greeter", "SayHello"
+    )
+    assert isinstance(method_descriptor.descriptor, MethodDescriptor)
+    assert method_descriptor.descriptor.name == "SayHello"
+    assert method_descriptor.descriptor.containing_service.name == "Greeter"

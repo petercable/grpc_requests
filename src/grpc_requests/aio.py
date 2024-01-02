@@ -71,7 +71,7 @@ def reflection_request(channel, requests):
         for resp in responses:
             yield resp
     except grpc._channel._Rendezvous as err:
-        print(err)
+        logger.error(err)
 
 
 class BaseAsyncClient:
@@ -196,6 +196,7 @@ class MethodMetaData(NamedTuple):
     output_type: Any
     method_type: MethodType
     handler: Any
+    descriptor: MethodDescriptor
 
 
 IS_REQUEST_STREAM = TypeVar("IS_REQUEST_STREAM")
@@ -302,6 +303,7 @@ class BaseAsyncGrpcClient(BaseAsyncClient):
                 input_type=input_type,
                 output_type=output_type,
                 handler=handler,
+                descriptor=method_desc,
             )
         return metadata
 

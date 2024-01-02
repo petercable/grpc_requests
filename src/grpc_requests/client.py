@@ -195,6 +195,7 @@ class MethodMetaData(NamedTuple):
     output_type: Any
     method_type: MethodType
     handler: Any
+    descriptor: MethodDescriptor
 
 
 IS_REQUEST_STREAM = TypeVar("IS_REQUEST_STREAM")
@@ -244,9 +245,9 @@ class BaseGrpcClient(BaseClient):
     def check_method_available(self, service, method, method_type: MethodType = None):
         if not self.has_server_registered:
             self.register_all_service()
-        print(service)
+        logger.debug(service)
         methods_meta = self._service_methods_meta.get(service)
-        print(methods_meta)
+        logger.debug(methods_meta)
         if not methods_meta:
             raise ValueError(
                 f"{self.endpoint} server doesn't support {service}. Available services {self.service_names}"
@@ -298,6 +299,7 @@ class BaseGrpcClient(BaseClient):
                 input_type=input_type,
                 output_type=output_type,
                 handler=handler,
+                descriptor=method_desc,
             )
         return metadata
 
@@ -541,7 +543,7 @@ class StubClient(BaseGrpcClient):
             self.register_all_service()
 
     def _get_service_names(self):
-        svcs = [x.full_name for x in self.service_descriptors]
+        svcs = [service.full_name for service in self.service_descriptors]
         return svcs
 
 
