@@ -306,7 +306,7 @@ class BaseGrpcClient(BaseClient):
     def register_service(self, service_name):
         logger.debug(f"start {service_name} registration")
         try:
-            svc_desc = self._desc_pool.FindServiceByName(service_name)
+            svc_desc = self.get_service_descriptor(service_name)
             self._service_methods_meta[service_name] = self._register_methods(svc_desc)
         except KeyError:
             logger.debug(
@@ -377,6 +377,13 @@ class BaseGrpcClient(BaseClient):
         return self._request(service, method, requests, raw_output, **kwargs)
 
     def get_service_descriptor(self, service):
+        """
+        Retrieve the service descriptor for a given service name.
+
+        :param service: The name of the service to retrieve the descriptor for.
+        :return: The service descriptor.
+        :throws KeyError: If the service is not found in the descriptor pool.
+        """
         return self._desc_pool.FindServiceByName(service)
 
     def describe_method_request(self, service, method):
@@ -461,13 +468,13 @@ class ReflectionClient(BaseGrpcClient):
         services = tuple([s.name for s in resp.list_services_response.service])
         return services
 
-    def _get_file_descriptor_by_name(self, name):
+    def get_file_descriptor_by_name(self, name):
         request = reflection_pb2.ServerReflectionRequest(file_by_filename=name)
         result = self._reflection_single_request(request)
         proto = result.file_descriptor_response.file_descriptor_proto[0]
         return descriptor_pb2.FileDescriptorProto.FromString(proto)
 
-    def _get_file_descriptor_by_symbol(self, symbol):
+    def get_file_descriptor_by_symbol(self, symbol):
         request = reflection_pb2.ServerReflectionRequest(file_containing_symbol=symbol)
         result = self._reflection_single_request(request)
         proto = result.file_descriptor_response.file_descriptor_proto[0]
@@ -489,7 +496,7 @@ class ReflectionClient(BaseGrpcClient):
                 f"found {len(dependencies)} dependencies for {file_descriptor.name}"
             )
             for dep_file_name in dependencies:
-                dep_desc = self._get_file_descriptor_by_name(dep_file_name)
+                dep_desc = self.get_file_descriptor_by_name(dep_file_name)
                 self._register_file_descriptor(dep_desc)
             try:
                 self._desc_pool.Add(file_descriptor)
@@ -501,7 +508,7 @@ class ReflectionClient(BaseGrpcClient):
 
     def _is_service_registered(self, service_name):
         try:
-            self._desc_pool.FindServiceByName(service_name)
+            self.get_service_descriptor(service_name)
             logger.debug(f"{service_name} already registered")
             return True
         except KeyError:
@@ -510,7 +517,7 @@ class ReflectionClient(BaseGrpcClient):
     def register_service(self, service_name):
         if not self._is_service_registered(service_name):
             logger.debug(f"start {service_name} registration")
-            file_descriptor = self._get_file_descriptor_by_symbol(service_name)
+            file_descriptor = self.get_file_descriptor_by_symbol(service_name)
             self._register_file_descriptor(file_descriptor)
             logger.debug(f"{service_name} registration complete")
         super(ReflectionClient, self).register_service(service_name)

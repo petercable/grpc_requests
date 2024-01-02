@@ -196,3 +196,32 @@ def test_method_descriptor_on_meta(helloworld_reflection_client):
     assert isinstance(method_descriptor.descriptor, MethodDescriptor)
     assert method_descriptor.descriptor.name == "SayHello"
     assert method_descriptor.descriptor.containing_service.name == "Greeter"
+
+
+def test_get_service_descriptor(helloworld_reflection_client):
+    service_descriptor = helloworld_reflection_client.get_service_descriptor(
+        "helloworld.Greeter"
+    )
+    assert service_descriptor.name == "Greeter"
+
+
+def test_get_file_descriptor_by_name(helloworld_reflection_client):
+    file_descriptor = helloworld_reflection_client.get_file_descriptor_by_name(
+        "helloworld.proto"
+    )
+    assert file_descriptor.name == "helloworld.proto"
+    assert file_descriptor.package == "helloworld"
+    # assert file_descriptor.message_types_by_name["HelloRequest"].name == "HelloRequest"
+    # assert file_descriptor.services_by_name["Greeter"].name == "Greeter"
+    # assert file_descriptor.enum_types_by_name["Language"].name == "Language"
+
+
+def test_get_file_descriptor_by_symbol(helloworld_reflection_client):
+    file_descriptor = helloworld_reflection_client.get_file_descriptor_by_symbol(
+        "helloworld.HelloRequest"
+    )
+    assert file_descriptor.name == "helloworld.proto"
+    assert file_descriptor.package == "helloworld"
+    # assert file_descriptor.message_types_by_name["HelloRequest"].name == "HelloRequest"
+    # assert file_descriptor.services_by_name["Greeter"].name == "Greeter"
+    # assert file_descriptor.enum_types_by_name["Language"].name == "Language"
