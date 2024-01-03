@@ -140,6 +140,10 @@ client = Client("localhost:50051")
 
 greeterServiceDescriptor = client.get_service_descriptor("helloworld.Greeter")
 sayHelloDescriptor = client.get_method_descriptor("helloworld.Greeter","SayHello")
+
+#As of 0.1.14 FileDescriptor Methods are only exposed on Reflection Clients
+fileDescriptorByName = client.get_file_descriptor_by_name("helloworld.proto")
+fileDescriptorBySymbol = client.get_file_descriptor_by_symbol("helloworld.Greeter")
 ```
 
 ### Method Metadata

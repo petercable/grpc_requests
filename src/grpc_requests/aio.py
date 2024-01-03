@@ -309,7 +309,7 @@ class BaseAsyncGrpcClient(BaseAsyncClient):
 
     async def register_service(self, service_name):
         logger.debug(f"start {service_name} register")
-        svc_desc = self._desc_pool.FindServiceByName(service_name)
+        svc_desc = self.get_service_descriptor(service_name)
         self._service_methods_meta[service_name] = self._register_methods(svc_desc)
         logger.debug(f"end {service_name} register")
 
@@ -448,13 +448,13 @@ class ReflectionAsyncClient(BaseAsyncGrpcClient):
         services = tuple([s.name for s in resp.list_services_response.service])
         return services
 
-    async def _get_file_descriptor_by_name(self, name):
+    async def get_file_descriptor_by_name(self, name):
         request = reflection_pb2.ServerReflectionRequest(file_by_filename=name)
         result = await self._reflection_single_request(request)
         proto = result.file_descriptor_response.file_descriptor_proto[0]
         return descriptor_pb2.FileDescriptorProto.FromString(proto)
 
-    async def _get_file_descriptor_by_symbol(self, symbol):
+    async def get_file_descriptor_by_symbol(self, symbol):
         request = reflection_pb2.ServerReflectionRequest(file_containing_symbol=symbol)
         result = await self._reflection_single_request(request)
         proto = result.file_descriptor_response.file_descriptor_proto[0]
@@ -477,7 +477,7 @@ class ReflectionAsyncClient(BaseAsyncGrpcClient):
             )
             for dep_file_name in dependencies:
                 if not self._is_descriptor_registered(dep_file_name):
-                    dep_desc = await self._get_file_descriptor_by_name(dep_file_name)
+                    dep_desc = await self.get_file_descriptor_by_name(dep_file_name)
                     await self._register_file_descriptor(dep_desc)
             try:
                 self._desc_pool.Add(file_descriptor)
@@ -489,7 +489,7 @@ class ReflectionAsyncClient(BaseAsyncGrpcClient):
 
     def _is_service_registered(self, service_name):
         try:
-            self._desc_pool.FindServiceByName(service_name)
+            self.get_service_descriptor(service_name)
             logger.debug(f"{service_name} already registered")
             return True
         except KeyError:
@@ -498,7 +498,7 @@ class ReflectionAsyncClient(BaseAsyncGrpcClient):
     async def register_service(self, service_name):
         if not self._is_service_registered(service_name):
             logger.debug(f"start {service_name} registration")
-            file_descriptor = await self._get_file_descriptor_by_symbol(service_name)
+            file_descriptor = await self.get_file_descriptor_by_symbol(service_name)
             await self._register_file_descriptor(file_descriptor)
             logger.debug(f"{service_name} registration complete")
         await super(ReflectionAsyncClient, self).register_service(service_name)

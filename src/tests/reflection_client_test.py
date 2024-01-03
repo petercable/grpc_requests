@@ -211,17 +211,13 @@ def test_get_file_descriptor_by_name(helloworld_reflection_client):
     )
     assert file_descriptor.name == "helloworld.proto"
     assert file_descriptor.package == "helloworld"
-    # assert file_descriptor.message_types_by_name["HelloRequest"].name == "HelloRequest"
-    # assert file_descriptor.services_by_name["Greeter"].name == "Greeter"
-    # assert file_descriptor.enum_types_by_name["Language"].name == "Language"
+    assert file_descriptor.syntax == "proto3"
 
 
 def test_get_file_descriptor_by_symbol(helloworld_reflection_client):
     file_descriptor = helloworld_reflection_client.get_file_descriptor_by_symbol(
-        "helloworld.HelloRequest"
+        "helloworld.Greeter"
     )
     assert file_descriptor.name == "helloworld.proto"
     assert file_descriptor.package == "helloworld"
-    # assert file_descriptor.message_types_by_name["HelloRequest"].name == "HelloRequest"
-    # assert file_descriptor.services_by_name["Greeter"].name == "Greeter"
-    # assert file_descriptor.enum_types_by_name["Language"].name == "Language"
+    assert file_descriptor.syntax == "proto3"

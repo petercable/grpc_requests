@@ -131,3 +131,33 @@ async def test_reflection_service_client_invalid_service():
     client = AsyncClient("localhost:50051")
     with pytest.raises(ValueError):
         await client.service("helloWorld.Singer")
+
+@pytest.mark.asyncio
+async def test_get_service_descriptor():
+    client = AsyncClient("localhost:50051")
+    service_descriptor = client.get_service_descriptor(
+        "helloworld.Greeter"
+    )
+    assert service_descriptor.name == "Greeter"
+
+
+@pytest.mark.asyncio
+async def test_get_file_descriptor_by_name():
+    client = AsyncClient("localhost:50051")
+    file_descriptor = await client.get_file_descriptor_by_name(
+        "helloworld.proto"
+    )
+    assert file_descriptor.name == "helloworld.proto"
+    assert file_descriptor.package == "helloworld"
+    assert file_descriptor.syntax == "proto3"
+
+
+@pytest.mark.asyncio
+async def test_get_file_descriptor_by_symbol():
+    client = AsyncClient("localhost:50051")
+    file_descriptor = await client.get_file_descriptor_by_symbol(
+        "helloworld.Greeter"
+    )
+    assert file_descriptor.name == "helloworld.proto"
+    assert file_descriptor.package == "helloworld"
+    assert file_descriptor.syntax == "proto3"
